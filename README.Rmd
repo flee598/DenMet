@@ -1,0 +1,36 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  dpi = 300,
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  warning = FALSE,
+  message = FALSE 
+)
+```
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+
+A few functions used for creating and manipulating dendritic networks.
+
+### Installation
+```{r, warning = FALSE}
+# devtools::install_github("flee598/DenMet")
+library(DenMet)
+```
+
+### create a dendritic network with 10 nodes
+```{r}
+nwk <- fun_crtNwk(10, "int")
+fun_pltNwk(nwk[[1]]$ig)
+```
+
+

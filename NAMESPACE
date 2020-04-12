@@ -3,6 +3,7 @@
 export(fun_crtNwk)
 export(fun_downstream_nodes)
 export(fun_headwater_nodes)
+export(fun_pltNwk)
 export(fun_reverse_graph)
 export(fun_strahler_order)
 export(fun_upstream_nodes)

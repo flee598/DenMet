@@ -313,3 +313,25 @@ fun_strahler_order <- function(g){
   g
 }
 
+#' quick and dirty plot of network
+#'
+#' @param g a dendritic network as an igraph object
+#' @return plot
+#' @examples
+#' \dontrun{
+#' fun_pltNwk(g)
+#' }
+#' @export
+fun_pltNwk <- function(g) {
+  l <- igraph::layout_as_tree(g, flip.y = FALSE)
+  plot(g,
+    vertex.label.color = "black",
+    vertex.size = 10,
+    vertex.color = "darkgray",
+    vertex.frame.color = " white",
+    vertex.shape = "circle",
+    edge.width = 5,
+    edge.arrow.size = 0,
+    edge.color = "grey",
+    layout = l, asp = 0)
+}
