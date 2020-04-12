@@ -14,11 +14,11 @@ A few functions used for creating and manipulating dendritic networks.
 library(DenMet)
 ```
 
-### create a dendritic network with 10 nodes
+### Create a dendritic network with 10 nodes
 
 ``` r
 nwk <- fun_crtNwk(10, "int")
-plot(nwk[[1]]$ig)
+fun_pltNwk(nwk[[1]]$ig)
 ```
 
 ![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
