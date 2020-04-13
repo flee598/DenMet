@@ -207,8 +207,8 @@ generate.noise <- function(alpha = 0, beta = 1, C = 1, L = 0, H = 1, num_gens) {
 #' }
 #' @export
 fun_reverse_graph <- function(g) {
-  if (!is.directed(g)) stop("Graph must be directed.")
-  el <- get.edgelist(g, names = FALSE)
+  if (!igraph::is.directed(g)) stop("Graph must be directed.")
+  el <- igraph::get.edgelist(g, names = FALSE)
   graph(rbind(el[, 2], el[, 1]))
 }
 
@@ -224,16 +224,16 @@ fun_reverse_graph <- function(g) {
 #' }
 #' @export
 fun_upstream_nodes <- function(g, w){
-  if (!is.directed(g)) stop("Graph must be directed.")
-  V(g)$name <- paste(V(g))
-  sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "out")
+  if (!igraph::is.directed(g)) stop("Graph must be directed.")
+  igraph::V(g)$name <- paste(igraph::V(g))
+  sp.mat <- igraph::shortest.paths(g, v = igraph::V(g), to = w, mode = "out")
   if (is.null(dimnames(sp.mat))) {
-    dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
+    dimnames(sp.mat) <- list(paste(1:igraph::vcount(g)), paste(w))
   }
-  sp.mat[, V(g)[w]$name] %>%
+  sp.mat[, igraph::V(g)[w]$name] %>%
     Filter(f = is.finite) %>%
     names %>%
-    {V(g)[.]} %>%
+    {igraph::V(g)[.]} %>%
     as.numeric %>%
     setdiff(w)
 }
@@ -251,20 +251,19 @@ fun_upstream_nodes <- function(g, w){
 #' }
 #' @export
 fun_downstream_nodes <- function(g, w){
-  if (!is.directed(g)) stop("Graph must be directed.")
-  V(g)$name <- paste(V(g))
-  sp.mat <- shortest.paths(g, v = V(g), to = w, mode = "in")
+  if (!igraph::is.directed(g)) stop("Graph must be directed.")
+  igraph::V(g)$name <- paste(igraph::V(g))
+  sp.mat <- igraph::shortest.paths(g, v = V(g), to = w, mode = "in")
   if (is.null(dimnames(sp.mat))) {
-    dimnames(sp.mat) <- list(paste(1:vcount(g)), paste(w))
+    dimnames(sp.mat) <- list(paste(1:igraph::vcount(g)), paste(w))
   }
-  sp.mat[, V(g)[w]$name] %>%
+  sp.mat[, igraph::V(g)[w]$name] %>%
     Filter(f = is.finite) %>%
     names %>%
-    {V(g)[.]} %>%
+    {igraph::V(g)[.]} %>%
     as.numeric %>%
     setdiff(w)
 }
-
 
 #' get all headwater nodes
 #'
@@ -276,8 +275,8 @@ fun_downstream_nodes <- function(g, w){
 #' }
 #' @export
 fun_headwater_nodes <- function(g){
-  if (!is.directed(g)) stop("Graph must be directed.")
-  which(degree(g, v = V(g), mode = "in") == 0)
+  if (!igraph::is.directed(g)) stop("Graph must be directed.")
+  which(igraph::degree(g, v = igraph::V(g), mode = "in") == 0)
 }
 
 
@@ -291,8 +290,8 @@ fun_headwater_nodes <- function(g){
 #' }
 #' @export
 fun_strahler_order <- function(g){
-  ll <- vector(mode = "list", length = gorder(g))
-  ll[1:gorder(g)] <- 0
+  ll <- vector(mode = "list", length = igraph::gorder(g))
+  ll[1:igraph::gorder(g)] <- 0
   h <- fun_headwater_nodes(g)
   ll[h] <- 1
   while (any(ll == 0)) {
@@ -301,7 +300,7 @@ fun_strahler_order <- function(g){
     if (length(u2) == 1) {
       ll[x] <- ll[u2]
     } else {
-      adjV <- unlist(adjacent_vertices(g, x, mode = "in"))
+      adjV <- unlist(igraph::adjacent_vertices(g, x, mode = "in"))
       if (length(unique(ll[adjV])) == 1) {
         ll[x] <- ll[adjV[1]][[1]] + 1
       } else {
@@ -309,7 +308,7 @@ fun_strahler_order <- function(g){
       }
     }
   }
-  g <- set_vertex_attr(g, "strahler", value = unlist(ll))
+  g <- igraph::set_vertex_attr(g, "strahler", value = unlist(ll))
   g
 }
 
