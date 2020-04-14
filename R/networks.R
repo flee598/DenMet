@@ -253,7 +253,7 @@ fun_upstream_nodes <- function(g, w){
 fun_downstream_nodes <- function(g, w){
   if (!igraph::is.directed(g)) stop("Graph must be directed.")
   igraph::V(g)$name <- paste(igraph::V(g))
-  sp.mat <- igraph::shortest.paths(g, v = V(g), to = w, mode = "in")
+  sp.mat <- igraph::shortest.paths(g, v = igraph::V(g), to = w, mode = "in")
   if (is.null(dimnames(sp.mat))) {
     dimnames(sp.mat) <- list(paste(1:igraph::vcount(g)), paste(w))
   }
