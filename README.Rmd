@@ -42,7 +42,7 @@ g <- igraph::graph.adjacency(g)
 fun_pltNwk(g, "in", edge.arrow.size = 0)
 ```
 
-# Add strahler order graph nodes
+# Add strahler order to graph nodes
 ```{r}
 g <- fun_strahler_order(g)
 igraph::get.vertex.attribute(g)

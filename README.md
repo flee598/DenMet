@@ -35,11 +35,11 @@ fun_pltNwk(g, "in", edge.arrow.size = 0)
 
 ![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
 
-# Add strahler order graph nodes
+# Add strahler order to graph nodes
 
 ``` r
 g <- fun_strahler_order(g)
 igraph::get.vertex.attribute(g)
 #> $strahler
-#>  [1] 3 3 1 2 2 1 1 1 1 1
+#>  [1] 2 2 2 2 1 1 1 1 1 1
 ```
