@@ -35,15 +35,21 @@ nwk <-  fun_crtNwk(10, "int")
 fun_pltNwk(nwk$ig, direct = "out", edge.arrow.size = 2)
 ```
 
-# Downstream network, hide arrows
+### Downstream network, hide arrows
 ```{r}
 g <- nwk$adjDwn
 g <- igraph::graph.adjacency(g)
 fun_pltNwk(g, "in", edge.arrow.size = 0)
 ```
 
-# Add strahler order to graph nodes
+### Add strahler order to graph nodes
 ```{r}
 g <- fun_strahler_order(g)
 igraph::get.vertex.attribute(g)
+```
+
+### Get downstream and upstream nodes of a given node
+```{r}
+fun_downstream_nodes(g, 8)
+fun_upstream_nodes(g, 2)
 ```

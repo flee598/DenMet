@@ -25,7 +25,7 @@ fun_pltNwk(nwk$ig, direct = "out", edge.arrow.size = 2)
 
 ![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
 
-# Downstream network, hide arrows
+### Downstream network, hide arrows
 
 ``` r
 g <- nwk$adjDwn
@@ -35,11 +35,20 @@ fun_pltNwk(g, "in", edge.arrow.size = 0)
 
 ![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
 
-# Add strahler order to graph nodes
+### Add strahler order to graph nodes
 
 ``` r
 g <- fun_strahler_order(g)
 igraph::get.vertex.attribute(g)
 #> $strahler
-#>  [1] 2 2 2 2 1 1 1 1 1 1
+#>  [1] 3 3 2 2 1 1 1 1 1 1
+```
+
+### Get downstream and upstream nodes of a given node
+
+``` r
+fun_downstream_nodes(g, 8)
+#> [1] 1 2 4
+fun_upstream_nodes(g, 2)
+#> [1]  3  4  5  6  7  8  9 10
 ```
