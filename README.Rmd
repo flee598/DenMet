@@ -24,11 +24,10 @@ wrappers for various igraph functions.
 
 ### Installation
 ```{r, warning = FALSE}
-devtools::install_github("flee598/DenMet")
+# devtools::install_github("flee598/DenMet")
 library(DenMet)
 library(igraph)
 ```
-
 
 ### Create a dendritic network with 10 nodes
 ```{r}
@@ -36,15 +35,14 @@ nwk <-  fun_crtNwk(10, "int")
 fun_pltNwk(nwk$ig, direct = "out", edge.arrow.size = 2)
 ```
 
-
-# downstream network, hide arrows
+# Downstream network, hide arrows
 ```{r}
 g <- nwk$adjDwn
 g <- igraph::graph.adjacency(g)
 fun_pltNwk(g, "in", edge.arrow.size = 0)
 ```
 
-# add strahler order graph nodes
+# Add strahler order graph nodes
 ```{r}
 g <- fun_strahler_order(g)
 igraph::get.vertex.attribute(g)

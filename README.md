@@ -11,16 +11,7 @@ mainly wrappers for various igraph functions.
 ### Installation
 
 ``` r
-devtools::install_github("flee598/DenMet")
-#> 
-#>          checking for file 'C:\Users\Finn\AppData\Local\Temp\RtmpO2vjA2\remotes376839f46d87\flee598-DenMet-283193d/DESCRIPTION' ...  v  checking for file 'C:\Users\Finn\AppData\Local\Temp\RtmpO2vjA2\remotes376839f46d87\flee598-DenMet-283193d/DESCRIPTION'
-#>       -  preparing 'DenMet':
-#>    checking DESCRIPTION meta-information ...     checking DESCRIPTION meta-information ...   v  checking DESCRIPTION meta-information
-#>       -  checking for LF line-endings in source and make files and shell scripts
-#>   -  checking for empty or unneeded directories
-#>       -  building 'DenMet_0.1.0.tar.gz'
-#>      
-#> 
+# devtools::install_github("flee598/DenMet")
 library(DenMet)
 library(igraph)
 ```
@@ -34,7 +25,7 @@ fun_pltNwk(nwk$ig, direct = "out", edge.arrow.size = 2)
 
 ![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
 
-# downstream network, hide arrows
+# Downstream network, hide arrows
 
 ``` r
 g <- nwk$adjDwn
@@ -44,11 +35,11 @@ fun_pltNwk(g, "in", edge.arrow.size = 0)
 
 ![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
 
-# add strahler order graph nodes
+# Add strahler order graph nodes
 
 ``` r
 g <- fun_strahler_order(g)
 igraph::get.vertex.attribute(g)
 #> $strahler
-#>  [1] 3 2 2 2 1 1 1 1 1 1
+#>  [1] 3 3 1 2 2 1 1 1 1 1
 ```
