@@ -292,7 +292,7 @@ fun_headwater_nodes <- function(g){
 #' @export
 fun_strahler_order <- function(g){
   if (!igraph::is.directed(g)) stop("Graph must be directed.")
-  if (any(as_adj(g, sparse = F)[upper.tri(as_adj(g, sparse = F))] != 0)) stop("Graph must be directed downstream only")
+  if (any(igraph::as_adj(g, sparse = F)[upper.tri(igraph::as_adj(g, sparse = F))] != 0)) stop("Graph must be directed downstream only")
     ll <- vector(mode = "list", length = igraph::gorder(g))
   ll[1:igraph::gorder(g)] <- 0
   h <- fun_headwater_nodes(g)
