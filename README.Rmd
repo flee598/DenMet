@@ -19,12 +19,14 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-A few functions used for creating and manipulating dendritic networks.
+A few functions used for creating and manipulating dendritic networks, mainly 
+wrappers for various igraph functions. 
 
 ### Installation
 ```{r, warning = FALSE}
 devtools::install_github("flee598/DenMet")
 library(DenMet)
+library(igraph)
 ```
 
 
@@ -45,5 +47,5 @@ fun_pltNwk(g, "in", edge.arrow.size = 0)
 # add strahler order graph nodes
 ```{r}
 g <- fun_strahler_order(g)
-get.vertex.attribute(g)
+igraph::get.vertex.attribute(g)
 ```
