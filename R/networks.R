@@ -135,17 +135,17 @@ fun_crtNwk <- function(nNodes, shape = c("lin", "int", "den")) {
       algorithm = "dijkstra")
 
     ## store all useful network info
-    nwkOut <- list(edges = sNodeLs2, adj = adj_mtx, nwk = g, tr = tr,
+    list(edges = sNodeLs2, adjUp = adj_mtx, adjDwn = t(adj_mtx), nwk = g, tr = tr,
       unweighted_mtx = unweighted_mtx, weighted_mtx = weighted_mtx,
       ig = ig, nodeToNodeDist = nodeToNodeDist, wgtNodetoNodeDist = wgtNodetoNodeDist)
-    list(nwkOut)
-
   } else {
-    list(edges = NULL, adj = NULL, nwk = NULL, tr = NULL, unweighted_mtx = NULL,
-      weighted_mtx = NULL, ig = NULL, nodeToNodeDist = NULL, wgtNodetoNodeDist = NULL)
+    list(edges = NULL, adjUp = NULL, adjDwn = NULL, nwk = NULL, tr = NULL,
+      unweighted_mtx = NULL, weighted_mtx = NULL, ig = NULL,
+      nodeToNodeDist = NULL, wgtNodetoNodeDist = NULL)
   }
 }
 
+#' importFrom magrittr %>%
 
 #' Rescale vector to desired range.
 #'
@@ -283,6 +283,7 @@ fun_headwater_nodes <- function(g){
 #' Get strahler order
 #'
 #' @param g a dendritic network as an igraph object
+#' @param dirtect "in
 #' @return an igraph object with stream strahler order added as an attribute
 #' @examples
 #' \dontrun{
@@ -290,13 +291,15 @@ fun_headwater_nodes <- function(g){
 #' }
 #' @export
 fun_strahler_order <- function(g){
-  ll <- vector(mode = "list", length = igraph::gorder(g))
+  if (!igraph::is.directed(g)) stop("Graph must be directed.")
+  if (any(as_adj(g, sparse = F)[upper.tri(as_adj(g, sparse = F))] != 0)) stop("Graph must be directed downstream only")
+    ll <- vector(mode = "list", length = igraph::gorder(g))
   ll[1:igraph::gorder(g)] <- 0
   h <- fun_headwater_nodes(g)
   ll[h] <- 1
   while (any(ll == 0)) {
     x <- max(which(ll == 0))
-    u2 <- fun_upstream_nodes(g, x)
+    u2 <- unlist(igraph::adjacent_vertices(g, x, mode = "in"))
     if (length(u2) == 1) {
       ll[x] <- ll[u2]
     } else {
@@ -312,7 +315,8 @@ fun_strahler_order <- function(g){
   g
 }
 
-#' quick and dirty plot of network
+#' Quick and dirty plotting of dendritic networks, wrapper for
+#' igraph::layout_as_tree and plot.igraph.
 #'
 #' @param g a dendritic network as an igraph object
 #' @return plot
@@ -321,8 +325,8 @@ fun_strahler_order <- function(g){
 #' fun_pltNwk(g)
 #' }
 #' @export
-fun_pltNwk <- function(g) {
-  l <- igraph::layout_as_tree(g, flip.y = FALSE)
+fun_pltNwk <- function(g, direct = c("in", "out"), ...) {
+  l <- suppressWarnings(igraph::layout_as_tree(g, flip.y = FALSE, mode = direct))
   plot(g,
     vertex.label.color = "black",
     vertex.size = 10,
@@ -330,7 +334,10 @@ fun_pltNwk <- function(g) {
     vertex.frame.color = " white",
     vertex.shape = "circle",
     edge.width = 5,
-    edge.arrow.size = 0,
+    # edge.arrow.size = 2,
     edge.color = "grey",
-    layout = l, asp = 0)
+    layout = l,
+    asp = 0,
+    ...)
 }
+
