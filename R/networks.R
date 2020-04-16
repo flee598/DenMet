@@ -1,3 +1,50 @@
+#' importFrom magrittr %>%
+#' importFrom purrr map
+
+#' fun_get_cut_off, used internally by fun_strahler_order
+#'
+#' @param dwnAdj downstream adjecent nodes
+#' @param jAdded just added nodes
+#' @param g graph
+#' @return cutoff dist
+fun_get_cut_off <- function(dwnAdj, jAdded, g) {
+  tt <- expand.grid(dwnAdj, jAdded)
+  xx <- mapply(all_simple_paths,
+    from = tt$Var1,
+    to = tt$Var2,
+    MoreArgs = list(
+      graph = g,
+      mode = "in"))
+  xx <- Filter(length, xx)
+  min(unlist(map(map(xx, unlist), length)))
+}
+
+
+#' find headwaters alt, used internally by fun_strahler_order
+#'
+#' @param g graph
+#' @return A vector of alt headwater nodes
+fun_headW <- function(g) {
+  h <- fun_headwater_nodes(g)
+  dwnAdj <- unique(unlist(adjacent_vertices(g, v = h, mode = "out")))
+  cutoff <- fun_get_cut_off(dwnAdj, h, g)
+  for (i in dwnAdj) {
+    #i = 9
+    a <- all_simple_paths(g, from = i,  to = h, mode = "in")
+    b <- max(unlist(map(a, length)))
+    if (b > cutoff) # remove i from dwnAdj
+      dwnAdj <- setdiff(dwnAdj, i)
+  }
+  unique(unlist(adjacent_vertices(g, v = dwnAdj, mode = "in")))
+}
+
+#' sample that deals with length == 1, used internally by fun_strahler_order
+#'
+#' @param x vector
+#' @return intiger
+sample.vec <- function(x, ...) x[sample(length(x), ...)]
+
+
 #' Create networks
 #'
 #' @param nNodes Intiger numbr of nodes.
@@ -145,7 +192,9 @@ fun_crtNwk <- function(nNodes, shape = c("lin", "int", "den")) {
   }
 }
 
-#' importFrom magrittr %>%
+
+
+
 
 #' Rescale vector to desired range.
 #'
@@ -290,24 +339,51 @@ fun_headwater_nodes <- function(g){
 #' fun_strahler_order(g)
 #' }
 #' @export
-fun_strahler_order <- function(g){
-  if (!igraph::is.directed(g)) stop("Graph must be directed.")
-  if (any(igraph::as_adj(g, sparse = F)[upper.tri(igraph::as_adj(g, sparse = F))] != 0)) stop("Graph must be directed downstream only")
-    ll <- vector(mode = "list", length = igraph::gorder(g))
+fun_strahler_order <- function(g) {
+
+  # setup
+  ll <- vector(mode = "list", length = igraph::gorder(g))
+  names(ll) <- 1:length(ll)
   ll[1:igraph::gorder(g)] <- 0
-  h <- fun_headwater_nodes(g)
-  ll[h] <- 1
+  ll[fun_headwater_nodes(g)] <- 1
+  headW <- fun_headW(g)
+
+  # keep going till all reaches have their order
   while (any(ll == 0)) {
-    x <- max(which(ll == 0))
-    u2 <- unlist(igraph::adjacent_vertices(g, x, mode = "in"))
+
+    ll2 <- ll[ll == 0]
+    x <- as.numeric(names(ll2))
+    tt <- expand.grid(x, headW)
+
+    xx <- mapply(igraph::all_simple_paths,
+      from = tt$Var1,
+      to = tt$Var2,
+      MoreArgs = list(
+        graph = g,
+        mode = "in")
+    )
+    tt$minLen <- unlist(purrr::map(purrr::map(xx, unlist), length))
+    tt <- tt[tt$minLen > 0, ]
+
+    v = vector(length = length(tt$Var1))
+    for (i in seq_along(tt$Var1)) {
+      a <- igraph::all_simple_paths(g, from = tt$Var1[i],  to = headW, mode = "in")
+      v[i] <- max(unlist(purrr::map(a, length)))
+    }
+
+    tt$maxlen <- v
+    tt <- tt[tt$maxlen == min(tt$maxlen), ]
+    tt <- sample.vec(tt$Var1, size = 1)
+    u2 <- unlist(igraph::adjacent_vertices(g, tt, mode = "in"))
+
+    # assign strahler order
     if (length(u2) == 1) {
-      ll[x] <- ll[u2]
+      ll[tt] <- ll[u2]
     } else {
-      adjV <- unlist(igraph::adjacent_vertices(g, x, mode = "in"))
-      if (length(unique(ll[adjV])) == 1) {
-        ll[x] <- ll[adjV[1]][[1]] + 1
+      if (length(unique(ll[u2])) == 1) {
+        ll[tt] <- ll[u2[1]][[1]] + 1
       } else {
-        ll[x] <- max(unlist(ll[adjV]))
+        ll[tt] <- max(unlist(ll[u2]))
       }
     }
   }
