@@ -2,9 +2,10 @@
 % Please edit documentation in R/networks.R
 \name{fun_pltNwk}
 \alias{fun_pltNwk}
-\title{quick and dirty plot of network}
+\title{Quick and dirty plotting of dendritic networks, wrapper for
+igraph::layout_as_tree and plot.igraph.}
 \usage{
-fun_pltNwk(g)
+fun_pltNwk(g, direct = c("in", "out"), ...)
 }
 \arguments{
 \item{g}{a dendritic network as an igraph object}
@@ -13,7 +14,8 @@ fun_pltNwk(g)
 plot
 }
 \description{
-quick and dirty plot of network
+Quick and dirty plotting of dendritic networks, wrapper for
+igraph::layout_as_tree and plot.igraph.
 }
 \examples{
 \dontrun{

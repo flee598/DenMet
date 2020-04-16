@@ -1,12 +1,7 @@
-#' importFrom magrittr %>%
-#' importFrom purrr map
+#' @importFrom magrittr %>%
+#' @importFrom purrr map
 
-#' fun_get_cut_off, used internally by fun_strahler_order
-#'
-#' @param dwnAdj downstream adjecent nodes
-#' @param jAdded just added nodes
-#' @param g graph
-#' @return cutoff dist
+# used internally by fun_strahler_order
 fun_get_cut_off <- function(dwnAdj, jAdded, g) {
   tt <- expand.grid(dwnAdj, jAdded)
   xx <- mapply(all_simple_paths,
@@ -16,14 +11,10 @@ fun_get_cut_off <- function(dwnAdj, jAdded, g) {
       graph = g,
       mode = "in"))
   xx <- Filter(length, xx)
-  min(unlist(map(map(xx, unlist), length)))
+  min(unlist(purrr::map(purrr::map(xx, unlist), length)))
 }
 
-
-#' find headwaters alt, used internally by fun_strahler_order
-#'
-#' @param g graph
-#' @return A vector of alt headwater nodes
+# used internally by fun_strahler_order
 fun_headW <- function(g) {
   h <- fun_headwater_nodes(g)
   dwnAdj <- unique(unlist(adjacent_vertices(g, v = h, mode = "out")))
@@ -31,17 +22,14 @@ fun_headW <- function(g) {
   for (i in dwnAdj) {
     #i = 9
     a <- all_simple_paths(g, from = i,  to = h, mode = "in")
-    b <- max(unlist(map(a, length)))
+    b <- max(unlist(purrr::map(a, length)))
     if (b > cutoff) # remove i from dwnAdj
       dwnAdj <- setdiff(dwnAdj, i)
   }
   unique(unlist(adjacent_vertices(g, v = dwnAdj, mode = "in")))
 }
 
-#' sample that deals with length == 1, used internally by fun_strahler_order
-#'
-#' @param x vector
-#' @return intiger
+# used internally by fun_strahler_order
 sample.vec <- function(x, ...) x[sample(length(x), ...)]
 
 
