@@ -26,7 +26,6 @@ wrappers for various igraph functions.
 ```{r, warning = FALSE}
 # devtools::install_github("flee598/DenMet")
 library(DenMet)
-library(igraph)
 ```
 
 ### Create a dendritic network with 10 nodes

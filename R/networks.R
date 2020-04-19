@@ -1,7 +1,10 @@
-#' @importFrom magrittr %>%
+#' used internally by fun_strahler_order
+#'
+#' @param dwnAdj directed adjacency mtx
+#' @param jAdded Vector of just added nodes
+#' @param g graph object
+#' @return integer - cut-off distance
 #' @importFrom purrr map
-
-# used internally by fun_strahler_order
 fun_get_cut_off <- function(dwnAdj, jAdded, g) {
   tt <- expand.grid(dwnAdj, jAdded)
   xx <- mapply(all_simple_paths,
@@ -14,10 +17,15 @@ fun_get_cut_off <- function(dwnAdj, jAdded, g) {
   min(unlist(purrr::map(purrr::map(xx, unlist), length)))
 }
 
-# used internally by fun_strahler_order
+
+#' used internally by fun_strahler_order
+#'
+#' @param g graph object
+#' @return vector of "true" headwater nodes
+#' @importFrom purrr map
 fun_headW <- function(g) {
   h <- fun_headwater_nodes(g)
-  dwnAdj <- unique(unlist(adjacent_vertices(g, v = h, mode = "out")))
+  dwnAdj <- unique(unlist(igraph::adjacent_vertices(g, v = h, mode = "out")))
   cutoff <- fun_get_cut_off(dwnAdj, h, g)
   for (i in dwnAdj) {
     #i = 9
@@ -26,10 +34,13 @@ fun_headW <- function(g) {
     if (b > cutoff) # remove i from dwnAdj
       dwnAdj <- setdiff(dwnAdj, i)
   }
-  unique(unlist(adjacent_vertices(g, v = dwnAdj, mode = "in")))
+  unique(unlist(igraph::adjacent_vertices(g, v = dwnAdj, mode = "in")))
 }
 
-# used internally by fun_strahler_order
+#' used internally by fun_strahler_order
+#'
+#' @param x vector of 1+ length
+#' @return vector
 sample.vec <- function(x, ...) x[sample(length(x), ...)]
 
 
@@ -255,6 +266,7 @@ fun_reverse_graph <- function(g) {
 #' @param g a dendritic network as an igraph object
 #' @param w target node
 #' @return a vector of upstream node id's
+#' @importFrom magrittr %>%
 #' @examples
 #' \dontrun{
 #' fun_upstream_nodes(g, 5)
@@ -282,6 +294,7 @@ fun_upstream_nodes <- function(g, w){
 #' @param g a dendritic network as an igraph object
 #' @param w target node
 #' @return a vector of downstream node id's
+#' @importFrom magrittr %>%
 #' @examples
 #' \dontrun{
 #' fun_downstream_nodes(g, 5)
