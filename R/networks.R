@@ -341,25 +341,26 @@ fun_strahler_order <- function(g) {
 
     ll2 <- ll[ll == 0]
     x <- as.numeric(names(ll2))
-    tt <- expand.grid(x, headW)
+    tt <- expand.grid(x, headW = headW)
 
     xx <- mapply(igraph::all_simple_paths,
       from = tt$Var1,
-      to = tt$Var2,
+      to = tt$headW,
       MoreArgs = list(
         graph = g,
         mode = "in")
     )
+
     tt$minLen <- unlist(purrr::map(purrr::map(xx, unlist), length))
     tt <- tt[tt$minLen > 0, ]
-
-    v = vector(length = length(tt$Var1))
-    for (i in seq_along(tt$Var1)) {
-      a <- igraph::all_simple_paths(g, from = tt$Var1[i],  to = headW, mode = "in")
+    Var1 <- unique(tt$Var1)
+    v = vector(length = length(Var1))
+    for (i in seq_along(Var1)) {
+      a <- igraph::all_simple_paths(g, from = Var1[i],  to = headW, mode = "in")
       v[i] <- max(unlist(purrr::map(a, length)))
     }
-
-    tt$maxlen <- v
+    maxlen <-  data.frame(Var1, maxlen = v)
+    tt <-  merge(data.frame(tt), maxlen, by = "Var1")
     tt <- tt[tt$maxlen == min(tt$maxlen), ]
     tt <- sample.vec(tt$Var1, size = 1)
     u2 <- unlist(igraph::adjacent_vertices(g, tt, mode = "in"))
@@ -378,6 +379,7 @@ fun_strahler_order <- function(g) {
   g <- igraph::set_vertex_attr(g, "strahler", value = unlist(ll))
   g
 }
+
 
 #' Quick and dirty plotting of dendritic networks, wrapper for
 #' igraph::layout_as_tree and plot.igraph.
