@@ -7,7 +7,7 @@
 #' @importFrom purrr map
 fun_get_cut_off <- function(dwnAdj, jAdded, g) {
   tt <- expand.grid(dwnAdj, jAdded)
-  xx <- mapply(all_simple_paths,
+  xx <- mapply(igraph::all_simple_paths,
     from = tt$Var1,
     to = tt$Var2,
     MoreArgs = list(
@@ -29,7 +29,7 @@ fun_headW <- function(g) {
   cutoff <- fun_get_cut_off(dwnAdj, h, g)
   for (i in dwnAdj) {
     #i = 9
-    a <- all_simple_paths(g, from = i,  to = h, mode = "in")
+    a <- igraph::all_simple_paths(g, from = i,  to = h, mode = "in")
     b <- max(unlist(purrr::map(a, length)))
     if (b > cutoff) # remove i from dwnAdj
       dwnAdj <- setdiff(dwnAdj, i)
@@ -364,6 +364,7 @@ fun_strahler_order <- function(g) {
         mode = "in")
     )
 
+
     tt$minLen <- unlist(purrr::map(purrr::map(xx, unlist), length))
     tt <- tt[tt$minLen > 0, ]
     Var1 <- unique(tt$Var1)
@@ -392,7 +393,6 @@ fun_strahler_order <- function(g) {
   g <- igraph::set_vertex_attr(g, "strahler", value = unlist(ll))
   g
 }
-
 
 #' Quick and dirty plotting of dendritic networks, wrapper for
 #' igraph::layout_as_tree and plot.igraph.
