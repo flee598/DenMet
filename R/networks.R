@@ -394,6 +394,31 @@ fun_strahler_order <- function(g) {
   g
 }
 
+
+#' Shreve's stream magnitude
+#'
+#' @param g a dendritic network as an igraph object
+#' @return an igraph object with stream Shreve's order added as an attribute
+#' @examples
+#' \dontrun{
+#' fun_shreve_mag(g)
+#' }
+#' @export
+fun_shreve_mag <- function(g) {
+  y <- fun_headwater_nodes(g)
+
+  z <- sapply(1:igraph::gorder(g), function(x) {
+    x <- fun_upstream_nodes(g, x)
+    length(intersect(y,x))
+  }
+  )
+  z <- ifelse(z == 0, 1, z)
+  g <- igraph::set_vertex_attr(g, "shreve", value = z)
+  g
+}
+
+
+
 #' Quick and dirty plotting of dendritic networks, wrapper for
 #' igraph::layout_as_tree and plot.igraph.
 #'
