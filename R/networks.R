@@ -395,14 +395,10 @@ fun_strahler_order <- function(g) {
 }
 
 
-#' Shreve's stream magnitude
+#' Shreves stream magnitude
 #'
 #' @param g a dendritic network as an igraph object
 #' @return an igraph object with stream Shreve's order added as an attribute
-#' @examples
-#' \dontrun{
-#' fun_shreve_mag(g)
-#' }
 #' @export
 fun_shreve_mag <- function(g) {
   y <- fun_headwater_nodes(g)
