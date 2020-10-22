@@ -8,11 +8,9 @@ fun_strahler_order(g)
 }
 \arguments{
 \item{g}{a dendritic network as an igraph object}
-
-\item{dirtect}{"in}
 }
 \value{
-an igraph object with stream strahler order added as an attribute
+a vector of stream strahler orders
 }
 \description{
 Get strahler order

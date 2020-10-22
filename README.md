@@ -13,7 +13,6 @@ mainly wrappers for various igraph functions.
 ``` r
 # devtools::install_github("flee598/DenMet")
 library(DenMet)
-library(igraph)
 ```
 
 ### Create a dendritic network with 10 nodes
@@ -35,13 +34,11 @@ fun_pltNwk(g, "in", edge.arrow.size = 0)
 
 ![](man/figures/README-unnamed-chunk-4-1.png)<!-- -->
 
-### Add strahler order to graph nodes
+### get strahler order of graph nodes
 
 ``` r
-g <- fun_strahler_order(g)
-igraph::get.vertex.attribute(g)
-#> $strahler
-#>  [1] 3 3 2 2 1 1 1 1 1 1
+fun_strahler_order(g)
+#>  [1] 3 2 2 2 1 1 1 1 1 1
 ```
 
 ### Get downstream and upstream nodes of a given node
@@ -50,5 +47,5 @@ igraph::get.vertex.attribute(g)
 fun_downstream_nodes(g, 8)
 #> [1] 1 2 4
 fun_upstream_nodes(g, 2)
-#> [1]  3  4  5  6  7  8  9 10
+#> [1] 4 5 8 9
 ```

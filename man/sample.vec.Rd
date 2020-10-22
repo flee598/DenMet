@@ -2,7 +2,7 @@
 % Please edit documentation in R/networks.R
 \name{sample.vec}
 \alias{sample.vec}
-\title{used internally by fun_strahler_order}
+\title{used internally by fun_shreve_mag}
 \usage{
 sample.vec(x, ...)
 }
@@ -13,5 +13,5 @@ sample.vec(x, ...)
 vector
 }
 \description{
-used internally by fun_strahler_order
+used internally by fun_shreve_mag
 }

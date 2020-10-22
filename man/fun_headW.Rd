@@ -2,7 +2,7 @@
 % Please edit documentation in R/networks.R
 \name{fun_headW}
 \alias{fun_headW}
-\title{used internally by fun_strahler_order}
+\title{used internally by fun_shreve_mag}
 \usage{
 fun_headW(g)
 }
@@ -13,5 +13,5 @@ fun_headW(g)
 vector of "true" headwater nodes
 }
 \description{
-used internally by fun_strahler_order
+used internally by fun_shreve_mag
 }

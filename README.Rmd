@@ -41,10 +41,9 @@ g <- igraph::graph.adjacency(g)
 fun_pltNwk(g, "in", edge.arrow.size = 0)
 ```
 
-### Add strahler order to graph nodes
+### get strahler order of graph nodes
 ```{r}
-g <- fun_strahler_order(g)
-igraph::get.vertex.attribute(g)
+fun_strahler_order(g)
 ```
 
 ### Get downstream and upstream nodes of a given node

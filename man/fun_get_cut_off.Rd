@@ -2,7 +2,7 @@
 % Please edit documentation in R/networks.R
 \name{fun_get_cut_off}
 \alias{fun_get_cut_off}
-\title{used internally by fun_strahler_order}
+\title{used internally by fun_shreve_mag}
 \usage{
 fun_get_cut_off(dwnAdj, jAdded, g)
 }
@@ -17,5 +17,5 @@ fun_get_cut_off(dwnAdj, jAdded, g)
 integer - cut-off distance
 }
 \description{
-used internally by fun_strahler_order
+used internally by fun_shreve_mag
 }

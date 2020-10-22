@@ -1,4 +1,4 @@
-#' used internally by fun_strahler_order
+#' used internally by fun_shreve_mag
 #'
 #' @param dwnAdj directed adjacency mtx
 #' @param jAdded Vector of just added nodes
@@ -18,7 +18,7 @@ fun_get_cut_off <- function(dwnAdj, jAdded, g) {
 }
 
 
-#' used internally by fun_strahler_order
+#' used internally by fun_shreve_mag
 #'
 #' @param g graph object
 #' @return vector of "true" headwater nodes
@@ -37,7 +37,7 @@ fun_headW <- function(g) {
   unique(unlist(igraph::adjacent_vertices(g, v = dwnAdj, mode = "in")))
 }
 
-#' used internally by fun_strahler_order
+#' used internally by fun_shreve_mag
 #'
 #' @param x vector of 1+ length
 #' @return vector
@@ -193,8 +193,6 @@ fun_crtNwk <- function(nNodes, shape = c("lin", "int", "den")) {
 
 
 
-
-
 #' Rescale vector to desired range.
 #'
 #' @param x vector
@@ -333,67 +331,52 @@ fun_headwater_nodes <- function(g){
 #' Get strahler order
 #'
 #' @param g a dendritic network as an igraph object
-#' @param dirtect "in
-#' @return an igraph object with stream strahler order added as an attribute
+#' @return a vector of stream strahler orders
 #' @examples
 #' \dontrun{
 #' fun_strahler_order(g)
 #' }
 #' @export
 fun_strahler_order <- function(g) {
+  # go from starting graph to directed towards the root
+  g <- igraph::as_adjacency_matrix(igraph::as.undirected(g), type = "lower")
+  g <- igraph::graph.adjacency(g)
 
-  # setup
-  ll <- vector(mode = "list", length = igraph::gorder(g))
-  names(ll) <- 1:length(ll)
-  ll[1:igraph::gorder(g)] <- 0
-  ll[fun_headwater_nodes(g)] <- 1
-  headW <- fun_headW(g)
+  # set-up
+  df <- data.frame(node = 1:igraph::gorder(g), d = igraph::degree(g, mode = "in"), strahler = 0)
+  df$strahler <- ifelse(df$d == 0, 1, 0)
+  df <- df[,c(1,3)]
+  strt <- df[df$strahler == max(df$strahler),"node"]
 
-  # keep going till all reaches have their order
-  while (any(ll == 0)) {
+  while(any(df$strahler == 0)) {
 
-    ll2 <- ll[ll == 0]
-    x <- as.numeric(names(ll2))
-    tt <- expand.grid(x, headW = headW)
+    sav <- unique(unlist(igraph::adjacent_vertices(g, strt, mode = "out")))
 
-    xx <- mapply(igraph::all_simple_paths,
-      from = tt$Var1,
-      to = tt$headW,
-      MoreArgs = list(
-        graph = g,
-        mode = "in")
-    )
+    for( i in seq_along(strt)) {
 
+      # get downstream nodes (start with highest numbered node)
+      xx <- unlist(igraph::adjacent_vertices(g, rev(strt)[i], mode = "out"))
 
-    tt$minLen <- unlist(purrr::map(purrr::map(xx, unlist), length))
-    tt <- tt[tt$minLen > 0, ]
-    Var1 <- unique(tt$Var1)
-    v = vector(length = length(Var1))
-    for (i in seq_along(Var1)) {
-      a <- igraph::all_simple_paths(g, from = Var1[i],  to = headW, mode = "in")
-      v[i] <- max(unlist(purrr::map(a, length)))
-    }
-    maxlen <-  data.frame(Var1, maxlen = v)
-    tt <-  merge(data.frame(tt), maxlen, by = "Var1")
-    tt <- tt[tt$maxlen == min(tt$maxlen), ]
-    tt <- sample.vec(tt$Var1, size = 1)
-    u2 <- unlist(igraph::adjacent_vertices(g, tt, mode = "in"))
+      # upstream nodes
+      nd2 <- unlist(igraph::adjacent_vertices(g, xx, mode = "in"))
 
-    # assign strahler order
-    if (length(u2) == 1) {
-      ll[tt] <- ll[u2]
-    } else {
-      if (length(unique(ll[u2])) == 1) {
-        ll[tt] <- ll[u2[1]][[1]] + 1
-      } else {
-        ll[tt] <- max(unlist(ll[u2]))
+      # order of upstream nodes
+      strhl <- df[nd2, "strahler"]
+
+      # figure out new strahler order
+      res <- NA
+      if (length(strhl) == 1) res <- strhl
+      if (length(strhl) > 1) {
+        res <- ifelse(strhl[1] == strhl[2], max(strhl) + 1, max(strhl))
       }
-    }
-  }
-  g <- igraph::set_vertex_attr(g, "strahler", value = unlist(ll))
-  g
-}
+      #update dataframe
+      df[xx, "strahler"] <- res
 
+    }
+    strt <- sav
+  }
+  df$strahler
+}
 
 #' Shreves stream magnitude
 #'
@@ -427,7 +410,6 @@ fun_pltNwk <- function(g, direct = c("in", "out"), ...) {
   l <- suppressWarnings(igraph::layout_as_tree(g, flip.y = FALSE, mode = direct))
   plot(g,
     vertex.label.color = "black",
-    vertex.size = 10,
     vertex.color = "darkgray",
     vertex.frame.color = " white",
     vertex.shape = "circle",
