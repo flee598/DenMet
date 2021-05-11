@@ -9,6 +9,10 @@ fun_pltNwk(g, direct = c("in", "out"), ...)
 }
 \arguments{
 \item{g}{a dendritic network as an igraph object}
+
+\item{direct}{edge direction}
+
+\item{...}{extra stuff to pass to `plot`}
 }
 \value{
 plot

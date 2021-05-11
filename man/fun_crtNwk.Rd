@@ -2,7 +2,7 @@
 % Please edit documentation in R/networks.R
 \name{fun_crtNwk}
 \alias{fun_crtNwk}
-\title{Create networks}
+\title{Create networks - outdated method}
 \usage{
 fun_crtNwk(nNodes, shape = c("lin", "int", "den"))
 }
@@ -15,7 +15,7 @@ fun_crtNwk(nNodes, shape = c("lin", "int", "den"))
 A list containing adjacency matrices and an igraph object.
 }
 \description{
-Create networks
+Creates a DEN based on probability triplets defined by `shape` parameter
 }
 \examples{
 \dontrun{

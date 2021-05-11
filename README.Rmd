@@ -30,14 +30,16 @@ library(DenMet)
 
 ### Create a dendritic network with 10 nodes
 ```{r}
-nwk <-  fun_crtNwk(10, "int")
-fun_pltNwk(nwk$ig, direct = "out", edge.arrow.size = 2)
+nwk <- DenMet::fun_crtNwk2(10, 0.5)
+nwk2 <- igraph::graph.adjacency(nwk)
+fun_pltNwk(nwk2, direct = "out", edge.arrow.size = 2)
 ```
 
 ### Downstream network, hide arrows
 ```{r}
-g <- nwk$adjDwn
-g <- igraph::graph.adjacency(g)
+
+nwk <- DenMet::fun_convert_nwk(nwk, "dwn_adj")
+g <- igraph::graph.adjacency(nwk)
 fun_pltNwk(g, "in", edge.arrow.size = 0)
 ```
 

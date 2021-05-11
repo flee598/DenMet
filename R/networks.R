@@ -40,11 +40,14 @@ fun_headW <- function(g) {
 #' used internally by fun_shreve_mag
 #'
 #' @param x vector of 1+ length
+#' @param ... extra stuff to pass to `sample`
 #' @return vector
 sample.vec <- function(x, ...) x[sample(length(x), ...)]
 
 
-#' Create networks
+#' Create networks - outdated method
+#'
+#' Creates a DEN based on probability triplets defined by `shape` parameter
 #'
 #' @param nNodes Intiger numbr of nodes.
 #' @param shape Network shape, one of "lin", "int" or "den".
@@ -62,7 +65,7 @@ fun_crtNwk <- function(nNodes, shape = c("lin", "int", "den")) {
     tr <- c(0,1,0)
   }
   if (shape == "int") {
-    tr <- runif(3, 0, 1)
+    tr <- stats::runif(3, 0, 1)
   }
 
   if (shape == "den") {
@@ -80,7 +83,7 @@ fun_crtNwk <- function(nNodes, shape = c("lin", "int", "den")) {
 
   # the + 10 is for over-spill, it will be culled later
   nodeLs <- vector(mode = "list", length = nNodes + 10)
-  nodeLs <- setNames(nodeLs, 1:nNodes)
+  nodeLs <- stats::setNames(nodeLs, 1:nNodes)
 
   # set first node
   node1 <- 1
@@ -191,6 +194,120 @@ fun_crtNwk <- function(nNodes, shape = c("lin", "int", "den")) {
   }
 }
 
+#' Create networks - update method
+#'
+#' Creates a DEN,
+#'
+#' @param nNodes Integer numbr of nodes.
+#' @param prb Branching probability
+#' @return An adjacency matrix
+#' @examples
+#' \dontrun{
+#' fun_crtNwk2(10, 0.5)
+#' }
+#' @export
+fun_crtNwk2 <- function(nNodes, prb) {
+
+  if (prb <= 0 | prb > 1) stop("prb must be > 0 and <= 1")
+  if (nNodes < 1) stop("nNodes must be an integer > 0")
+
+  resample <- function(x, ...) x[sample.int(length(x), ...)]
+  ntw <- vector(length = nNodes, mode = "list")
+  names(ntw) <- 1:nNodes
+  crnt <- 1
+  mx <- 1
+
+  while (mx < nNodes) {
+    adLst <- vector(length = nNodes, mode = "list")
+    for (i in crnt) {
+      ad <- stats::rbinom(1, 2 , prb)
+      if (ad > 0) {
+        ntw[[i]] <- mx + 1:ad
+        adLst[[i]] <- mx + 1:ad
+        mx <- max(mx + 1:ad)
+      } else {
+        adLst[[i]] <- NA
+        ntw[[i]] <- NA
+      }
+    }
+    crnt <- unlist(adLst)
+    crnt <- crnt[!is.na(crnt)]
+
+    # if no new nodes have been added sample all dead ends
+    if (length(crnt) == 0 ) {
+      crnt <- resample(as.numeric(names(ntw)[is.na(ntw)]), 1)
+    }
+  }
+
+  ntw <- rapply(ntw, function(x) ifelse(x > nNodes, NA, x), how = "replace")
+
+  # convert to adj mtx
+  adj_mtx <- matrix(0, nrow = nNodes, ncol = nNodes)
+  for (i in 1:length(ntw)) {
+    ntw[[i]]
+    adj_mtx[i, ntw[[i]]] <- 1
+  }
+  return(adj_mtx)
+}
+
+
+
+#' Convert SBN adjacency matrices to other useful formats.
+#'
+#' @param adj_mtx SBN mtx
+#' @param out One of 8 possible output formats
+#' @return An adjacency matrix
+#' @examples
+#' \dontrun{
+#' fun_convert_nwk(mtx, "ig")
+#' }
+#' @export
+fun_convert_nwk <- function(adj_mtx, out = c("dwn_adj", "unwtd_adj", "wtd_adj",
+                                             "ig", "dwn_ig", "unwtd_ig",
+                                             "n2n_dist", "unwtd_n2n_dist")) {
+
+  if (out == "dwn_adj") res <- t(adj_mtx)
+
+  if (out == "unwtd_adj") res <- t(adj_mtx) + adj_mtx
+
+  if (out == "wtd_adj") {
+    unwtd_mtx <- t(adj_mtx) + adj_mtx
+    res <- unwtd_mtx + adj_mtx
+  }
+
+  if (out == "ig") res <- igraph::graph_from_adjacency_matrix(adj_mtx)
+
+  if (out == "dwn_ig") {
+    dwn_adj <- t(adj_mtx)
+    res <- igraph::graph_from_adjacency_matrix(dwn_adj)
+  }
+
+  if (out == "unwtd_ig") {
+    res <- igraph::graph_from_adjacency_matrix(adj_mtx, mode = "undirected")
+  }
+
+  if (out == "n2n_dist") {
+    unwtd_mtx <- t(adj_mtx) + adj_mtx
+    wtd_mtx <- unwtd_mtx + adj_mtx
+    ig <- igraph::graph.adjacency(wtd_mtx, mode = "directed",
+                                  weighted = TRUE)
+    res <- igraph::shortest.paths(ig)
+  }
+
+  if (out == "unwtd_n2n_dist") {
+    unwtd_mtx <- t(adj_mtx) + adj_mtx
+    wtd_mtx <- unwtd_mtx + adj_mtx
+    disp_df <- igraph::get.data.frame(igraph::graph.adjacency(wtd_mtx,
+                                                              weighted = TRUE))
+    g2 <- igraph::graph.data.frame(disp_df, directed = TRUE)
+    res <- igraph::distances(g2, v = igraph::V(g2),
+                             to = igraph::V(g2),
+                             mode = "out",
+                             weights = disp_df$direct,
+                             algorithm = "dijkstra")
+  }
+  return(res)
+}
 
 
 #' Rescale vector to desired range.
@@ -234,10 +351,10 @@ generate.noise <- function(alpha = 0, beta = 1, C = 1, L = 0, H = 1, num_gens) {
   series[1] <- 0.0
   for (i in 2:num_gens)
   {
-    err.series[i] <- rnorm(1)
+    err.series[i] <- stats::rnorm(1)
     series[i] <- alpha * series[i - 1] + beta * err.series[i]
   }
-  series <- (sqrt(C) / sd(series)) * (series - mean(series))
+  series <- (sqrt(C) / stats::sd(series)) * (series - mean(series))
   series <- rescale.to.range2(series, L, H)
   series
 }
@@ -255,7 +372,7 @@ generate.noise <- function(alpha = 0, beta = 1, C = 1, L = 0, H = 1, num_gens) {
 fun_reverse_graph <- function(g) {
   if (!igraph::is.directed(g)) stop("Graph must be directed.")
   el <- igraph::get.edgelist(g, names = FALSE)
-  graph(rbind(el[, 2], el[, 1]))
+  igraph::graph(rbind(el[, 2], el[, 1]))
 }
 
 #' find all upstream nodes of a vertex
@@ -265,6 +382,7 @@ fun_reverse_graph <- function(g) {
 #' @param w target node
 #' @return a vector of upstream node id's
 #' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @examples
 #' \dontrun{
 #' fun_upstream_nodes(g, 5)
@@ -400,6 +518,8 @@ fun_shreve_mag <- function(g) {
 #' igraph::layout_as_tree and plot.igraph.
 #'
 #' @param g a dendritic network as an igraph object
+#' @param ... extra stuff to pass to `plot`
+#' @param direct edge direction
 #' @return plot
 #' @examples
 #' \dontrun{

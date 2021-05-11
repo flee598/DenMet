@@ -8,6 +8,8 @@ sample.vec(x, ...)
 }
 \arguments{
 \item{x}{vector of 1+ length}
+
+\item{...}{extra stuff to pass to `sample`}
 }
 \value{
 vector
